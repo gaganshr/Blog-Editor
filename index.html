@@ -23,30 +23,51 @@
     .logo__name{font-family:var(--ff-display);font-weight:700;font-size:20px;letter-spacing:.5px;}
     .logo__tag{font-size:11px;color:var(--c-ink-muted);letter-spacing:2px;text-transform:uppercase;}
     .spacer{flex:1}
-    .btn{font:inherit;font-weight:600;border-radius:9px;padding:11px 18px;cursor:pointer;border:1.5px solid transparent;text-decoration:none;display:inline-flex;align-items:center;gap:8px;line-height:1;}
+    .btn{font:inherit;font-weight:600;border-radius:9px;padding:11px 18px;cursor:pointer;border:1.5px solid transparent;text-decoration:none;display:inline-flex;align-items:center;gap:8px;line-height:1;white-space:nowrap;}
     .btn--primary{background:var(--c-primary);color:#fff;}
     .btn--primary:hover{background:var(--c-primary-deep);}
     .btn--ghost{background:#fff;color:var(--c-primary);border-color:var(--c-primary);}
-    .btn--sm{padding:7px 12px;font-size:13px;border-radius:7px;}
+    .btn--sm{padding:7px 11px;font-size:13px;border-radius:7px;}
+    .btn--neutral{background:#fff;color:var(--c-ink-muted);border-color:var(--c-rule);}
+    .btn--neutral:hover{color:var(--c-ink);border-color:#c9c9da;}
     .btn--danger{color:#C0392B;border-color:#E7B7B1;background:#fff;}
     .btn--danger:hover{background:#FCEBE9;}
-    .hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:40px 0 24px;flex-wrap:wrap;}
+    .hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:40px 0 18px;flex-wrap:wrap;}
     h1{font-family:var(--ff-display);font-weight:700;font-size:40px;letter-spacing:-.5px;margin:0;}
     .sub{color:var(--c-ink-muted);font-size:14px;margin-top:6px;}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;padding-bottom:60px;}
+    .toolbar{display:flex;gap:10px;align-items:center;margin:0 0 22px;flex-wrap:wrap;}
+    .search{flex:1;min-width:200px;position:relative;}
+    .search input{width:100%;font:inherit;padding:10px 12px 10px 36px;border:1px solid var(--c-rule);border-radius:9px;color:var(--c-ink);}
+    .search input:focus{outline:none;border-color:var(--c-primary);}
+    .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.5}
+    select{font:inherit;padding:10px 12px;border:1px solid var(--c-rule);border-radius:9px;color:var(--c-ink);background:#fff;cursor:pointer;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;padding-bottom:60px;}
     .card{border:1px solid var(--c-rule);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .15s,border-color .15s;background:#fff;}
     .card:hover{box-shadow:0 10px 30px rgba(26,27,58,.08);border-color:#d7d7e6;}
     .card__title{font-family:var(--ff-display);font-weight:600;font-size:22px;line-height:1.15;color:var(--c-ink);word-break:break-word;}
     .card__meta{font-size:12px;color:var(--c-ink-muted);}
-    .card__actions{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap;}
-    .empty,.state{border:1.5px dashed var(--c-rule);border-radius:14px;padding:48px 24px;text-align:center;color:var(--c-ink-muted);}
+    .card__row{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;}
+    .card__row--sub{border-top:1px solid var(--c-rule);padding-top:10px;}
+    .empty,.state{border:1.5px dashed var(--c-rule);border-radius:14px;padding:48px 24px;text-align:center;color:var(--c-ink-muted);grid-column:1/-1;}
     .empty h2{font-family:var(--ff-display);color:var(--c-ink);font-size:24px;margin:0 0 8px;}
     .banner{background:#FCE9DE;border:1px solid #F1C7B0;color:#7a3b16;border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.5;margin:16px 0;}
     .banner code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;}
-    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--c-ink);color:#fff;padding:10px 18px;border-radius:9px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:50;}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--c-ink);color:#fff;padding:10px 18px;border-radius:9px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:120;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     .spin{width:18px;height:18px;border:2px solid rgba(107,63,229,.25);border-top-color:var(--c-primary);border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:middle;}
     @keyframes sp{to{transform:rotate(360deg)}}
+    /* modal */
+    .overlay{position:fixed;inset:0;background:rgba(15,16,41,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:100;}
+    .overlay.show{display:flex;}
+    .modal{background:#fff;max-width:620px;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(15,16,41,.4);}
+    .modal__head{padding:20px 22px;border-bottom:1px solid var(--c-rule);display:flex;align-items:center;}
+    .modal__head h2{font-family:var(--ff-display);font-size:24px;margin:0;}
+    .modal__close{margin-left:auto;background:none;border:none;font-size:26px;color:var(--c-ink-muted);cursor:pointer;line-height:1;}
+    .tpl-list{padding:14px 22px 22px;display:grid;gap:12px;}
+    .tpl{border:1px solid var(--c-rule);border-radius:12px;padding:16px;cursor:pointer;transition:.12s;}
+    .tpl:hover{border-color:var(--c-primary);background:#FAF8FF;}
+    .tpl h3{font-family:var(--ff-display);font-size:19px;margin:0 0 4px;}
+    .tpl p{margin:0;font-size:13px;color:var(--c-ink-muted);line-height:1.5;}
   </style>
 </head>
 <body>
@@ -63,87 +84,123 @@
 
   <main class="wrap">
     <div class="hero-row">
-      <div>
-        <h1>Your blogs</h1>
-        <div class="sub" id="count">Loading…</div>
-      </div>
+      <div><h1>Your blogs</h1><div class="sub" id="count">Loading…</div></div>
     </div>
-    <div id="list"><div class="state"><span class="spin"></span> &nbsp;Loading your blogs…</div></div>
+    <div class="toolbar">
+      <label class="search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="Search blogs by title…" autocomplete="off">
+      </label>
+      <select id="sort">
+        <option value="updated_desc">Last updated (newest)</option>
+        <option value="updated_asc">Last updated (oldest)</option>
+        <option value="title_asc">Title A → Z</option>
+        <option value="title_desc">Title Z → A</option>
+      </select>
+    </div>
+    <div id="list" class="grid"><div class="state"><span class="spin"></span> &nbsp;Loading your blogs…</div></div>
   </main>
+
+  <!-- Template chooser -->
+  <div class="overlay" id="tplOverlay">
+    <div class="modal">
+      <div class="modal__head"><h2>Start a new blog</h2><button class="modal__close" id="tplClose">×</button></div>
+      <div class="tpl-list" id="tplList"></div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    var listEl = document.getElementById('list');
-    var countEl = document.getElementById('count');
-    var toastEl = document.getElementById('toast');
-    var toastTimer;
-    function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){toastEl.classList.remove('show');},2200); }
+    var TEMPLATES = [
+      { id:'credibility', name:'The Credibility Gap (full demo)', desc:'The complete sample article — hero image, key findings, exhibit charts, citations and sources. Best for learning the layout.' },
+      { id:'report', name:'Report with sections', desc:'Hero, key findings, three section headings and a sources list. A solid, ready-to-fill structure.' },
+      { id:'minimal', name:'Minimal article', desc:'Just a hero and one section. Start from a clean slate.' }
+    ];
+    var listEl=document.getElementById('list'), countEl=document.getElementById('count'), toastEl=document.getElementById('toast');
+    var searchEl=document.getElementById('search'), sortEl=document.getElementById('sort');
+    var allBlogs=[], toastTimer;
+    function toast(m){ toastEl.textContent=m; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){toastEl.classList.remove('show');},2400); }
     function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-    function fmt(iso){ if(!iso) return 'just now'; try{ var d=new Date(iso); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});}catch(e){return iso;} }
+    function fmt(iso){ if(!iso) return 'just now'; try{ var d=new Date(iso); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }catch(e){ return iso; } }
 
-    function configBanner(){
-      return '<div class="banner"><strong>Storage not connected yet.</strong> The blog library needs a Cloudflare KV namespace bound as <code>BLOGS</code>. Once that’s set up, your blogs will appear here. (See the setup steps you were given.)</div>';
-    }
-
-    function render(blogs){
-      countEl.textContent = blogs.length ? (blogs.length + (blogs.length===1?' blog':' blogs')) : 'No blogs yet';
-      if(!blogs.length){
-        listEl.innerHTML = '<div class="empty"><h2>No blogs yet</h2><div>Click <strong>+ New blog</strong> to start your first one.</div></div>';
-        return;
-      }
-      listEl.className='grid';
-      listEl.innerHTML = blogs.map(function(b){
+    function view(){
+      var q=(searchEl.value||'').trim().toLowerCase();
+      var rows=allBlogs.filter(function(b){ return !q || String(b.title||'').toLowerCase().indexOf(q)!==-1; });
+      var s=sortEl.value;
+      rows.sort(function(a,b){
+        if(s==='title_asc') return String(a.title||'').localeCompare(String(b.title||''));
+        if(s==='title_desc') return String(b.title||'').localeCompare(String(a.title||''));
+        var av=String(a.updatedAt||''), bv=String(b.updatedAt||'');
+        return s==='updated_asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+      countEl.textContent = allBlogs.length ? (rows.length+' of '+allBlogs.length+(allBlogs.length===1?' blog':' blogs')) : 'No blogs yet';
+      if(!allBlogs.length){ listEl.innerHTML='<div class="empty"><h2>No blogs yet</h2><div>Click <strong>+ New blog</strong> to start your first one.</div></div>'; return; }
+      if(!rows.length){ listEl.innerHTML='<div class="empty"><h2>No matches</h2><div>No blogs match “'+esc(q)+'”.</div></div>'; return; }
+      listEl.innerHTML = rows.map(function(b){
+        var ed='editor.html?id='+encodeURIComponent(b.id);
         return '<div class="card" data-id="'+esc(b.id)+'">'
           + '<div class="card__title">'+esc(b.title||'Untitled blog')+'</div>'
           + '<div class="card__meta">Updated '+esc(fmt(b.updatedAt))+'</div>'
-          + '<div class="card__actions">'
-            + '<a class="btn btn--primary btn--sm" href="editor.html?id='+encodeURIComponent(b.id)+'">Open</a>'
+          + '<div class="card__row">'
+            + '<a class="btn btn--primary btn--sm" href="'+ed+'">Open</a>'
             + '<button class="btn btn--ghost btn--sm" data-act="rename">Rename</button>'
             + '<button class="btn btn--danger btn--sm" data-act="delete">Delete</button>'
-          + '</div></div>';
+          + '</div>'
+          + '<div class="card__row card__row--sub">'
+            + '<a class="btn btn--neutral btn--sm" href="'+ed+'&export=word" target="_blank" rel="noopener" title="Open and download a Word .docx">⬇ Word</a>'
+            + '<a class="btn btn--neutral btn--sm" href="'+ed+'&export=html" target="_blank" rel="noopener" title="Open and download the web page (HTML)">⬇ HTML</a>'
+          + '</div>'
+        + '</div>';
       }).join('');
     }
 
     function load(){
-      listEl.className='';
       listEl.innerHTML='<div class="state"><span class="spin"></span> &nbsp;Loading your blogs…</div>';
       fetch('/api/blogs',{headers:{'accept':'application/json'}})
         .then(function(r){ if(!r.ok) return r.json().then(function(j){throw new Error(j.error||('HTTP '+r.status));}); return r.json(); })
-        .then(function(data){ render(data.blogs||[]); })
+        .then(function(d){ allBlogs=d.blogs||[]; view(); })
         .catch(function(err){
           countEl.textContent='Not connected';
-          listEl.className='';
-          listEl.innerHTML = configBanner() + '<div class="empty"><h2>Couldn’t load blogs</h2><div>'+esc(err.message)+'</div></div>';
+          listEl.innerHTML='<div class="banner"><strong>Storage not connected yet.</strong> The blog library needs a Cloudflare KV namespace bound as <code>BLOGS</code>. Once that’s set up, your blogs will appear here.</div><div class="empty"><h2>Couldn’t load blogs</h2><div>'+esc(err.message)+'</div></div>';
         });
     }
 
-    document.getElementById('newBlog').addEventListener('click', function(){
-      var btn=this; btn.disabled=true; btn.textContent='Creating…';
-      fetch('/api/blogs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:'Untitled blog'})})
+    // ---- New blog: template chooser ----
+    var tplOverlay=document.getElementById('tplOverlay');
+    function openTpl(){ document.getElementById('tplList').innerHTML = TEMPLATES.map(function(t){ return '<div class="tpl" data-tpl="'+t.id+'"><h3>'+esc(t.name)+'</h3><p>'+esc(t.desc)+'</p></div>'; }).join(''); tplOverlay.classList.add('show'); }
+    function closeTpl(){ tplOverlay.classList.remove('show'); }
+    document.getElementById('newBlog').addEventListener('click', openTpl);
+    document.getElementById('tplClose').addEventListener('click', closeTpl);
+    tplOverlay.addEventListener('click', function(e){ if(e.target===tplOverlay) closeTpl(); });
+    document.getElementById('tplList').addEventListener('click', function(e){
+      var t=e.target.closest('.tpl'); if(!t) return;
+      var tpl=t.getAttribute('data-tpl');
+      var tName=(TEMPLATES.filter(function(x){return x.id===tpl;})[0]||{}).name||'Untitled blog';
+      t.style.opacity='.5'; t.style.pointerEvents='none';
+      fetch('/api/blogs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title: tpl==='credibility' ? 'The credibility gap' : 'Untitled blog'})})
         .then(function(r){ if(!r.ok) return r.json().then(function(j){throw new Error(j.error||('HTTP '+r.status));}); return r.json(); })
-        .then(function(data){ window.location.href='editor.html?id='+encodeURIComponent(data.id)+'&new=1'; })
-        .catch(function(err){ btn.disabled=false; btn.textContent='+ New blog'; toast('Could not create: '+err.message); });
+        .then(function(d){ window.location.href='editor.html?id='+encodeURIComponent(d.id)+'&new=1&tpl='+encodeURIComponent(tpl); })
+        .catch(function(err){ closeTpl(); toast('Could not create: '+err.message); });
     });
 
+    // ---- card actions ----
     listEl.addEventListener('click', function(e){
       var btn=e.target.closest('button[data-act]'); if(!btn) return;
-      var card=e.target.closest('.card'); var id=card.getAttribute('data-id');
-      var act=btn.getAttribute('data-act');
+      var card=e.target.closest('.card'), id=card.getAttribute('data-id'), act=btn.getAttribute('data-act');
       var title=card.querySelector('.card__title').textContent;
       if(act==='delete'){
         if(!confirm('Delete “'+title+'”? This cannot be undone.')) return;
-        fetch('/api/blogs/'+encodeURIComponent(id),{method:'DELETE'})
-          .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); toast('Deleted'); load(); })
-          .catch(function(err){ toast('Delete failed: '+err.message); });
+        fetch('/api/blogs/'+encodeURIComponent(id),{method:'DELETE'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); toast('Deleted'); load(); }).catch(function(err){ toast('Delete failed: '+err.message); });
       } else if(act==='rename'){
         var name=prompt('Rename blog', title); if(name==null) return;
-        fetch('/api/blogs/'+encodeURIComponent(id),{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({title:name})})
-          .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); toast('Renamed'); load(); })
-          .catch(function(err){ toast('Rename failed: '+err.message); });
+        fetch('/api/blogs/'+encodeURIComponent(id),{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({title:name})}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); toast('Renamed'); load(); }).catch(function(err){ toast('Rename failed: '+err.message); });
       }
     });
 
+    searchEl.addEventListener('input', view);
+    sortEl.addEventListener('change', view);
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeTpl(); });
     load();
   </script>
 </body>

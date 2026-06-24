@@ -36495,44 +36495,85 @@ window.__BRAND_FONTS = [
       }, 1000);
     }
 
-    // Load the blog identified by ?id= from the cloud. With no id, return to
-    // the dashboard. A brand-new/empty blog keeps the built-in starter article.
+    // Turn the built-in demo article into one of the starting templates by
+    // trimming/replacing its blocks (the page CSS lives here, so templates are
+    // produced from the live DOM rather than stored as giant HTML strings).
+    function applyTemplate(tpl) {
+      if (!tpl || tpl === 'credibility') return; // full demo, as-is
+      try {
+        var q = function (s) { return document.querySelector(s); };
+        var qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+        var ht = q('.hero__title'); if (ht) ht.innerHTML = 'New blog title';
+        var hs = q('.hero__subtitle'); if (hs) hs.textContent = 'Add a subtitle that summarizes your article.';
+        var hcat = q('.hero__category'); if (hcat) hcat.textContent = 'CATEGORY · TOPIC';
+        var ha = q('.hero__art'); if (ha) ha.innerHTML = '<div style="position:absolute;inset:0;background:linear-gradient(135deg,#0F1029,#2a1d5e);"></div>';
+        var mn = q('.meta-bar__name'); if (mn) mn.textContent = 'Author name';
+        var mr = q('.meta-bar__role'); if (mr) mr.textContent = 'Role · Location';
+        qa('.exhibit, .sidebar, .pullquote, .methodology, .related, .author-card').forEach(function (el) { el.remove(); });
+        qa('.article__body').forEach(function (el) { el.remove(); });
+        var article = q('.article'); var sources = q('.footnotes'); var kf = q('.key-findings');
+        if (tpl === 'minimal') { if (kf) kf.remove(); }
+        else if (tpl === 'report' && kf) {
+          var kt = kf.querySelector('.key-findings__title'); if (kt) kt.textContent = 'Key findings';
+          var kol = kf.querySelector('ol'); if (kol) kol.innerHTML = '<li><strong>First key point.</strong> Supporting detail goes here.</li><li><strong>Second key point.</strong> Supporting detail goes here.</li><li><strong>Third key point.</strong> Supporting detail goes here.</li>';
+        }
+        var mk = function (h2, paras) {
+          var d = document.createElement('div'); d.className = 'article__body';
+          if (h2) { var h = document.createElement('h2'); h.textContent = h2; d.appendChild(h); }
+          (paras || []).forEach(function (p) { var el = document.createElement('p'); el.textContent = p; d.appendChild(el); });
+          return d;
+        };
+        var blocks = (tpl === 'minimal')
+          ? [mk('', ['Start writing your article here. Click any text to edit it, and use the + between sections to add more.'])]
+          : [mk('Introduction', ['Open with the context and why this matters.']), mk('Key analysis', ['Develop your main argument here.']), mk('Conclusion', ['Summarize and end with the implication.'])];
+        blocks.forEach(function (b) { if (article && sources) article.insertBefore(b, sources); else if (article) article.appendChild(b); });
+        if (sources) { var sol = sources.querySelector('ol'); if (sol) sol.innerHTML = '<li id="fn1">Add your first source here. <a href="https://example.com" target="_blank" rel="noopener">example.com</a></li>'; }
+      } catch (e) {}
+    }
+
+    // After a blog loads, optionally auto-run an export (used by the dashboard's
+    // per-card Word/HTML buttons via ?export=word|html).
+    function runAutoExport(kind) {
+      if (kind !== 'word' && kind !== 'html') return;
+      ensureFontsReady().then(function () {
+        setTimeout(function () {
+          try { if (kind === 'word') exportForEditors(); else exportHTML(); }
+          catch (e) { showToast('Export failed: ' + (e && e.message ? e.message : e)); }
+        }, 250);
+      });
+    }
+
+    // Load the blog identified by ?id= from the cloud. With no id, return to the
+    // dashboard. A brand-new blog (?new=1[&tpl=]) starts from the chosen template.
     function initBlogCms() {
-      let blogId = null;
-      try { blogId = new URLSearchParams(location.search).get('id'); } catch (e) {}
+      var params; try { params = new URLSearchParams(location.search); } catch (e) { params = { get: function () { return null; } }; }
+      var blogId = params.get('id');
       if (!blogId) {
-        // Opened directly as a file: keep legacy single-doc localStorage so the
-        // file still works offline. On the hosted site, send them to the
-        // dashboard to pick or create a blog.
         if (location.protocol === 'file:') { restoreFromStorage(); return; }
         location.replace('./');
         return;
       }
       window.__blogId = blogId;
-      const isNew = (function () { try { return new URLSearchParams(location.search).get('new') === '1'; } catch (e) { return false; } })();
+      var isNew = params.get('new') === '1';
+      var tpl = params.get('tpl');
+      var exportKind = params.get('export');
       fetch('/api/blogs/' + encodeURIComponent(blogId), { headers: { 'accept': 'application/json' } })
-        .then(function (r) {
-          if (r.status === 404) return null;
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.json();
-        })
+        .then(function (r) { if (r.status === 404) return null; if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function (data) {
           if (data && typeof data.html === 'string' && data.html.length > 200) {
-            const shell = document.querySelector('.page-shell');
-            if (shell) shell.innerHTML = data.html;
-            showToast('Blog loaded');
+            var shell = document.querySelector('.page-shell'); if (shell) shell.innerHTML = data.html;
+            if (!exportKind) showToast('Blog loaded');
           } else if (isNew) {
-            // New blog: keep the built-in template and save it as the starting point.
+            applyTemplate(tpl);
             serverSave();
             showToast('New blog — edit and it saves automatically');
           }
+          if (exportKind) runAutoExport(exportKind);
         })
         .catch(function (err) {
-          showToast('Could not load blog (' + err.message + ') — using local copy');
-          try {
-            const saved = localStorage.getItem(STORAGE_KEY + ':' + blogId);
-            if (saved && saved.length > 200) document.querySelector('.page-shell').innerHTML = saved;
-          } catch (e) {}
+          showToast('Could not load blog (' + err.message + ')');
+          try { var saved = localStorage.getItem(STORAGE_KEY + ':' + blogId); if (saved && saved.length > 200) document.querySelector('.page-shell').innerHTML = saved; } catch (e) {}
+          if (exportKind) runAutoExport(exportKind);
         });
     }
     function restoreFromStorage() {
