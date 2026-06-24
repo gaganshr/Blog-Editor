@@ -122,6 +122,7 @@
     var allBlogs=[], toastTimer;
     function toast(m){ toastEl.textContent=m; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){toastEl.classList.remove('show');},2400); }
     function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+    function slugify(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'untitled'; }
     function fmt(iso){ if(!iso) return 'just now'; try{ var d=new Date(iso); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }catch(e){ return iso; } }
 
     function view(){
@@ -138,7 +139,7 @@
       if(!allBlogs.length){ listEl.innerHTML='<div class="empty"><h2>No blogs yet</h2><div>Click <strong>+ New blog</strong> to start your first one.</div></div>'; return; }
       if(!rows.length){ listEl.innerHTML='<div class="empty"><h2>No matches</h2><div>No blogs match “'+esc(q)+'”.</div></div>'; return; }
       listEl.innerHTML = rows.map(function(b){
-        var ed='editor.html?id='+encodeURIComponent(b.id);
+        var ed='editor.html?id='+encodeURIComponent(b.id)+'&t='+slugify(b.title);
         return '<div class="card" data-id="'+esc(b.id)+'">'
           + '<div class="card__title">'+esc(b.title||'Untitled blog')+'</div>'
           + '<div class="card__meta">Updated '+esc(fmt(b.updatedAt))+'</div>'

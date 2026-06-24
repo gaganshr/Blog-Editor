@@ -36472,6 +36472,30 @@ window.__BRAND_FONTS = [
       return clone.innerHTML;
     }
 
+    // Current blog title from the hero (<br> -> space).
+    function currentBlogTitle() {
+      var t = document.querySelector('.hero__title');
+      if (!t) return '';
+      return t.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    }
+    function slugify(s) {
+      return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'untitled';
+    }
+    // Reflect the blog title in the browser tab and the address bar (a readable
+    // slug alongside the id), without reloading.
+    function updateDocTitleAndUrl(title) {
+      var clean = (title || '').trim();
+      document.title = (clean || 'Untitled') + ' — DEFINE Blog Studio';
+      try {
+        if (!window.__blogId) return;
+        var p = new URLSearchParams(location.search);
+        p.set('id', window.__blogId);
+        p.set('t', slugify(clean));
+        p.delete('new'); p.delete('tpl');
+        history.replaceState(null, '', location.pathname + '?' + p.toString());
+      } catch (e) {}
+    }
+
     let __srvTimer = null;
     function serverSave() {
       if (!window.__blogId) return;
@@ -36480,9 +36504,8 @@ window.__BRAND_FONTS = [
         let html, title;
         try {
           html = cleanPageShellHTML();
-          const t = document.querySelector('.hero__title');
-          title = t ? t.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : '';
-          title = title || 'Untitled blog';
+          title = currentBlogTitle() || 'Untitled blog';
+          updateDocTitleAndUrl(title);
         } catch (e) { return; }
         fetch('/api/blogs/' + encodeURIComponent(window.__blogId), {
           method: 'PUT',
@@ -36568,6 +36591,7 @@ window.__BRAND_FONTS = [
             serverSave();
             showToast('New blog — edit and it saves automatically');
           }
+          updateDocTitleAndUrl(currentBlogTitle());
           if (exportKind) runAutoExport(exportKind);
         })
         .catch(function (err) {
