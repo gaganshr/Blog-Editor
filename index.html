@@ -36505,11 +36505,25 @@ window.__BRAND_FONTS = [
       return framed || crossTop || opaque || cookieBlocked || googleSandbox;
     }
 
+    // Safari (desktop) and all iOS browsers silently drop a programmatic
+    // <a download> click that fires after an async step (the user-gesture
+    // token has expired) — and iOS ignores the download attribute entirely.
+    // For these, we present a visible Save button the user taps instead.
+    function isAppleBrowser() {
+      try {
+        const ua = navigator.userAgent || '';
+        const iOS = /iP(hone|ad|od)/.test(ua) ||
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const safari = /^((?!chrome|crios|android|edg|edgios|fxios|opr).)*safari/i.test(ua);
+        return iOS || safari;
+      } catch (e) { return false; }
+    }
+
     function triggerDownload(content, filename, mime, label) {
       const blocked = downloadsLikelyBlocked();
 
       // In a context that allows it, do a normal file download and stop.
-      if (!blocked) {
+      if (!blocked && !isAppleBrowser()) {
         let url = null;
         try {
           url = URL.createObjectURL(new Blob([content], { type: mime }));
@@ -37374,7 +37388,9 @@ window.__BRAND_FONTS = [
     function downloadBinary(blob, filename, label) {
       var blocked = false;
       try { blocked = downloadsLikelyBlocked(); } catch (e) {}
-      if (!blocked) {
+      // Apple browsers silently drop an async auto-download — give them the
+      // visible Save button instead (see isAppleBrowser).
+      if (!blocked && !isAppleBrowser()) {
         var url = null;
         try {
           url = URL.createObjectURL(blob);
@@ -37403,11 +37419,11 @@ window.__BRAND_FONTS = [
       card.style.cssText = 'background:#fff;max-width:520px;width:100%;border-radius:14px;box-shadow:0 24px 64px rgba(15,16,41,0.4);overflow:hidden;';
       card.innerHTML =
         '<div style="padding:18px 20px;border-bottom:1px solid rgba(26,27,58,0.1);">' +
-          '<div style="font-weight:700;font-size:20px;color:#1A1B3A;">Save ' + label + '</div>' +
-          '<div style="font-size:13px;color:#5B5C70;margin-top:4px;line-height:1.5;">This viewer blocks automatic downloads. Use the button below (or right-click it → “Save link as”).</div>' +
+          '<div style="font-weight:700;font-size:20px;color:#1A1B3A;">Your ' + label + ' is ready</div>' +
+          '<div style="font-size:13px;color:#5B5C70;margin-top:4px;line-height:1.5;">Tap the button below to save the file. (On iPhone/iPad it opens so you can save or share it.)</div>' +
         '</div>' +
         '<div style="padding:18px 20px;display:flex;gap:10px;align-items:center;">' +
-          '<a id="edDlSave" href="' + dataUrl + '" download="' + filename + '" style="background:#6B3FE5;color:#fff;border-radius:8px;padding:11px 18px;font-weight:600;text-decoration:none;">Save ' + filename + '</a>' +
+          '<a id="edDlSave" href="' + dataUrl + '" download="' + filename + '" target="_blank" rel="noopener" style="background:#6B3FE5;color:#fff;border-radius:8px;padding:11px 18px;font-weight:600;text-decoration:none;">Download ' + filename + '</a>' +
           '<button id="edDlClose" type="button" style="margin-left:auto;background:transparent;border:none;color:#5B5C70;font-size:24px;cursor:pointer;line-height:1;">×</button>' +
         '</div>';
       overlay.appendChild(card);
