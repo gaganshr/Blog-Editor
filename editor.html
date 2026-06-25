@@ -146,6 +146,16 @@
     .pullquote { max-width: var(--w-text); margin: 56px auto; font-family: var(--ff-display); font-weight: 500; font-size: clamp(24px, 3vw, 36px); line-height: 1.15; letter-spacing: -0.5px; color: var(--c-ink); padding: 28px 0 28px 32px; border-left: 3px solid var(--c-primary); }
     .pullquote::before { content: ''; display: block; width: 40px; height: 1px; background: var(--c-primary); margin-bottom: 24px; }
 
+    /* Side-by-side columns (text|text or image|text). Stacks on small screens. */
+    .two-col { max-width: var(--w-bleed); margin: 40px auto; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+    .two-col .two-col__cell { min-width: 0; }
+    .two-col .article__body { max-width: none; margin: 0; }
+    .two-col .exhibit, .two-col figure { max-width: none; margin: 0; }
+    .two-col .exhibit__art { padding: 0; }
+    .two-col .exhibit__art img, .two-col img { width: 100%; height: auto; display: block; border-radius: 8px; }
+    @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; gap: 24px; } }
+    body.ed-vp-mobile .two-col { grid-template-columns: 1fr; gap: 24px; }
+
     /* Exhibits */
     .exhibit { max-width: var(--w-bleed); margin: 56px auto; padding: 0; }
     .exhibit__label { font-size: 11px; letter-spacing: 2px; font-weight: 500; color: var(--c-primary-deep); margin-bottom: 8px; }
@@ -1731,9 +1741,10 @@
   <div class="ed-banner">
     <span class="ed-banner__tag">● Editing</span>
     <span class="ed-banner__hint">
-      Click text to edit · Select text for formatting ·
-      Hover any block → click the <kbd>⋮⋮</kbd> handle on the left to open settings ·
-      Hover between sections to <kbd>+</kbd> insert · Auto-saved
+      Click text to edit · Select text to format · Click any block to open its settings (restyle, replace image, delete) ·
+      Hover between sections and click <kbd>+</kbd> to insert — paragraph, image, <strong>side-by-side columns</strong>, quote… ·
+      Switch <kbd>🖥</kbd>/<kbd>▭</kbd>/<kbd>▯</kbd> to preview screen sizes · Edits <strong>auto-save to the cloud</strong> ·
+      <a href="./" style="color:inherit;text-decoration:underline;">← All blogs</a>
     </span>
   </div>
 
@@ -2134,6 +2145,14 @@
     <button class="ed-insert-menu__item" data-template="sidebar">
       <div class="ed-insert-menu__icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="1"/><path d="M5 6h6M5 8.5h4M5 11h5"/></svg></div>
       <div><div class="ed-insert-menu__label">Sidebar / Key data</div><div class="ed-insert-menu__desc">Lavender callout with stats grid</div></div>
+    </button>
+    <button class="ed-insert-menu__item" data-template="twocol">
+      <div class="ed-insert-menu__icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="5" height="10" rx="1"/><rect x="9" y="3" width="5" height="10" rx="1"/></svg></div>
+      <div><div class="ed-insert-menu__label">Two columns (text)</div><div class="ed-insert-menu__desc">Two text blocks side by side</div></div>
+    </button>
+    <button class="ed-insert-menu__item" data-template="imageText">
+      <div class="ed-insert-menu__icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="5" height="10" rx="1"/><path d="M2.6 11l1.4-1.4 1 1"/><circle cx="4.2" cy="6" r=".8" fill="currentColor" stroke="none"/><line x1="9" y1="5" x2="14" y2="5"/><line x1="9" y1="8" x2="14" y2="8"/><line x1="9" y1="11" x2="12.5" y2="11"/></svg></div>
+      <div><div class="ed-insert-menu__label">Image + text</div><div class="ed-insert-menu__desc">Picture beside a text block</div></div>
     </button>
     <button class="ed-insert-menu__item" data-template="divider">
       <div class="ed-insert-menu__icon"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="7.5" width="12" height="1"/></svg></div>
@@ -35509,6 +35528,8 @@ window.__BRAND_FONTS = [
       image:     '<figure class="exhibit" data-inserted="1"><div class="exhibit__label">EXHIBIT</div><h3 class="exhibit__title">New exhibit title</h3><div class="exhibit__art" style="padding:60px;text-align:center;color:#6B3FE5;font-family:Barlow Condensed,sans-serif;font-weight:500;background:#fff;border:1px solid #D4D5E0;border-radius:10px;">Click the panel\'s Replace Image button to add a picture</div><figcaption class="exhibit__caption">Caption text describing this exhibit.</figcaption></figure>',
       video:     '<figure class="exhibit" data-inserted="1"><div class="exhibit__label">VIDEO</div><h3 class="exhibit__title">New video</h3><div class="exhibit__art" style="padding:60px;text-align:center;color:#6B3FE5;font-family:Barlow Condensed,sans-serif;font-weight:500;background:#fff;border:1px solid #D4D5E0;border-radius:10px;">Click the panel\'s Insert Video button to add media</div><figcaption class="exhibit__caption">Video caption.</figcaption></figure>',
       sidebar:   '<aside class="sidebar" data-inserted="1"><div class="sidebar__label">KEY DATA</div><h3 class="sidebar__title">Sidebar title</h3><div class="sidebar__grid"><div class="sb-stat"><div class="sb-stat__num">00</div><div class="sb-stat__lbl">Metric label</div><div class="sb-stat__src">Source citation</div></div><div class="sb-stat"><div class="sb-stat__num alt">00</div><div class="sb-stat__lbl">Metric label</div><div class="sb-stat__src">Source citation</div></div></div></aside>',
+      twocol:    '<div class="two-col" data-inserted="1"><div class="two-col__cell article__body"><p>Left column — start writing here…</p></div><div class="two-col__cell article__body"><p>Right column — start writing here…</p></div></div>',
+      imageText: '<div class="two-col" data-inserted="1"><figure class="exhibit two-col__cell" data-ed-type="exhibit"><div class="exhibit__art" style="padding:48px;text-align:center;color:#6B3FE5;font-family:Barlow Condensed,sans-serif;font-weight:500;background:#fff;border:1px solid #D4D5E0;border-radius:10px;">Click this box, then ‘Replace image’ in the panel</div></figure><div class="two-col__cell article__body"><p>Text beside the image — start writing here…</p></div></div>',
       divider:   '<hr class="divider" data-inserted="1">'
     };
 
@@ -35998,20 +36019,80 @@ window.__BRAND_FONTS = [
     bind('edInsertImg', 'click', () => pickMedia('insert-img', 'image/*'));
     bind('edInsertVideo', 'click', () => pickMedia('insert-video', 'video/*'));
 
+    // Read a file to a data URL. Large images are downscaled (max 2000px) and
+    // re-encoded so the stored blog stays small enough to save reliably to the
+    // cloud — oversized base64 photos were the cause of image edits not saving.
+    function prepareMediaDataUrl(file, cb) {
+      const isVideo = file.type.startsWith('video/');
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target.result;
+        if (isVideo || (typeof dataUrl === 'string' && dataUrl.length < 700000)) { cb(dataUrl, isVideo); return; }
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const MAX = 2000;
+            const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+            const cw = Math.max(1, Math.round(img.naturalWidth * scale));
+            const ch = Math.max(1, Math.round(img.naturalHeight * scale));
+            const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch); // flatten transparency for JPEG
+            ctx.drawImage(img, 0, 0, cw, ch);
+            // Large images re-encode to JPEG (much smaller than PNG for photos),
+            // keeping the stored blog small enough to save reliably.
+            let out = c.toDataURL('image/jpeg', 0.85);
+            if (!out || out.length >= dataUrl.length) out = dataUrl; // never grow
+            cb(out, false);
+          } catch (e) { cb(dataUrl, false); }
+        };
+        img.onerror = () => cb(dataUrl, false);
+        img.src = dataUrl;
+      };
+      reader.onerror = () => showToast('Could not read file');
+      reader.readAsDataURL(file);
+    }
+
+    // Magic-fit: pick object-fit (cover vs contain) by comparing the image's
+    // aspect ratio to its frame, so the right style is chosen automatically.
+    function magicFitIn(target) {
+      try {
+        let img = null, container = null;
+        const hero = target.closest && target.closest('.hero');
+        if (hero) { img = hero.querySelector('.hero__art img'); container = hero.querySelector('.hero__art') || hero; }
+        else {
+          const art = target.closest && (target.closest('.exhibit__art') || (target.closest('.exhibit') && target.closest('.exhibit').querySelector('.exhibit__art')));
+          if (art) { img = art.querySelector('img'); container = art; }
+          else if (target.querySelector) { img = target.querySelector('img'); container = target; }
+        }
+        if (!img || !container) return;
+        const apply = () => {
+          const iw = img.naturalWidth, ih = img.naturalHeight;
+          const cw = container.clientWidth, ch = container.clientHeight;
+          if (!iw || !ih || !cw || !ch) return;
+          const diff = Math.abs(Math.log((iw / ih) / (cw / ch)));
+          const fit = diff < 0.35 ? 'cover' : 'contain';
+          img.style.objectFit = fit;
+          showToast('Magic-fit: ' + (fit === 'cover' ? 'Cover — fills the frame' : 'Contain — whole image shown'));
+        };
+        if (img.complete && img.naturalWidth) requestAnimationFrame(apply);
+        else img.addEventListener('load', () => requestAnimationFrame(apply), { once: true });
+      } catch (e) {}
+    }
+
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
       if (!pendingMediaTarget) { showToast('Lost target — please re-select block'); return; }
       const target = pendingMediaTarget;
       const action = pendingMediaAction;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
+      showToast('Processing media…');
+      prepareMediaDataUrl(file, (dataUrl, isVideo) => {
         try {
-          const dataUrl = ev.target.result;
-          const isVideo = file.type.startsWith('video/');
           if (action === 'replace') doReplace(target, dataUrl, isVideo);
           else if (action === 'insert-img') insertMedia(target, dataUrl, false);
           else if (action === 'insert-video') insertMedia(target, dataUrl, true);
+          if (!isVideo) magicFitIn(target);
           saveToStorage();
           showToast(isVideo ? 'Video added' : 'Image added');
         } catch (err) {
@@ -36021,9 +36102,7 @@ window.__BRAND_FONTS = [
         pendingMediaTarget = null;
         pendingMediaAction = null;
         fileInput.value = '';
-      };
-      reader.onerror = () => showToast('Could not read file');
-      reader.readAsDataURL(file);
+      });
     });
 
     function doReplace(target, dataUrl, isVideo) {
@@ -36496,27 +36575,38 @@ window.__BRAND_FONTS = [
       } catch (e) {}
     }
 
-    let __srvTimer = null;
+    let __srvTimer = null, __srvPending = false, __srvBusy = false;
     function serverSave() {
       if (!window.__blogId) return;
+      __srvPending = true;
       clearTimeout(__srvTimer);
-      __srvTimer = setTimeout(function () {
-        let html, title;
-        try {
-          html = cleanPageShellHTML();
-          title = currentBlogTitle() || 'Untitled blog';
-          updateDocTitleAndUrl(title);
-        } catch (e) { return; }
-        fetch('/api/blogs/' + encodeURIComponent(window.__blogId), {
-          method: 'PUT',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ title: title || 'Untitled blog', html: html })
-        }).then(function (r) {
-          if (r.ok) { showToast('Saved to cloud'); }
-          else { showToast('Cloud save failed (saved locally)'); }
-        }).catch(function () { showToast('Offline — saved locally'); });
-      }, 1000);
+      __srvTimer = setTimeout(flushSave, 1000);
     }
+    // Actually write to the cloud. Retries on failure and is also called when
+    // the tab is hidden / navigating away, so the last edit (e.g. a just-added
+    // image) is never lost to the debounce window.
+    function flushSave() {
+      if (!window.__blogId || !__srvPending || __srvBusy) return;
+      clearTimeout(__srvTimer);
+      let html, title;
+      try {
+        html = cleanPageShellHTML();
+        title = currentBlogTitle() || 'Untitled blog';
+        updateDocTitleAndUrl(title);
+      } catch (e) { return; }
+      __srvPending = false; __srvBusy = true;
+      fetch('/api/blogs/' + encodeURIComponent(window.__blogId), {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ title: title, html: html })
+      }).then(function (r) {
+        __srvBusy = false;
+        if (r.ok) { showToast('Saved to cloud'); }
+        else { __srvPending = true; showToast('Save failed — retrying…'); setTimeout(flushSave, 4000); }
+      }).catch(function () { __srvBusy = false; __srvPending = true; showToast('Offline — will retry'); setTimeout(flushSave, 4000); });
+    }
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flushSave(); });
+    window.addEventListener('pagehide', flushSave);
 
     // Turn the built-in demo article into one of the starting templates by
     // trimming/replacing its blocks (the page CSS lives here, so templates are
