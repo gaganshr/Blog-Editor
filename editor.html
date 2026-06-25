@@ -1987,6 +1987,11 @@
         <button class="ed-fit-btn" data-fit="fill" title="Stretch to fill (may distort aspect)">Fill</button>
         <button class="ed-fit-btn" data-fit="scale-down" title="Original size, no upscaling">Original</button>
       </div>
+      <div class="ed-pos-control" id="edPosControl" style="display:none;margin:6px 0 12px;">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.4px;color:var(--c-ink-muted);text-transform:uppercase;margin-bottom:8px;">Image position <span style="font-weight:400;text-transform:none;">— pan when cropped (Cover)</span></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><span style="font-size:13px;color:var(--c-ink-muted);width:16px;text-align:center;">↔</span><input type="range" id="edPosX" min="0" max="100" value="50" style="flex:1;"><span id="vPosX" style="font-size:11px;color:var(--c-ink-muted);width:34px;text-align:right;">50%</span></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:13px;color:var(--c-ink-muted);width:16px;text-align:center;">↕</span><input type="range" id="edPosY" min="0" max="100" value="50" style="flex:1;"><span id="vPosY" style="font-size:11px;color:var(--c-ink-muted);width:34px;text-align:right;">50%</span></div>
+      </div>
       <button class="ed-btn" id="edReplaceImg">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="1"/><circle cx="6" cy="7" r="1.2"/><path d="M14 11l-3-3-5 5"/></svg>
         Replace media (image / video)…
@@ -35842,69 +35847,126 @@ window.__BRAND_FONTS = [
     // ============================================================
     function bind(id, evt, fn) { const el = document.getElementById(id); if (el) el.addEventListener(evt, fn); }
 
+    // ============================================================
+    // RESPONSIVE PER-DEVICE OVERRIDES
+    // Edits made while previewing Tablet/Mobile are saved as overrides for
+    // that screen size (and smaller) instead of changing every screen. They
+    // are stored on the element (data-ed-resp) and emitted as media-query CSS
+    // (#ed-responsive-overrides, inside .page-shell) that travels with the
+    // saved/published blog. Desktop edits stay inline (unchanged behaviour).
+    // ============================================================
+    let __uidSeq = 0;
+    function ensureUid(el) {
+      if (!el.dataset.edUid) el.dataset.edUid = 'u' + Date.now().toString(36) + (__uidSeq++);
+      return el.dataset.edUid;
+    }
+    function getResp(el) { try { return el.dataset.edResp ? JSON.parse(el.dataset.edResp) : {}; } catch (e) { return {}; } }
+    function setResp(el, bp, prop, value) {
+      const o = getResp(el);
+      o[bp] = o[bp] || {};
+      if (value === '' || value == null) { delete o[bp][prop]; if (!Object.keys(o[bp]).length) delete o[bp]; }
+      else o[bp][prop] = value;
+      if (Object.keys(o).length) { ensureUid(el); el.dataset.edResp = JSON.stringify(o); }
+      else { delete el.dataset.edResp; }
+      regenResponsiveCSS();
+    }
+    function camel2kebab(s) { return s.replace(/[A-Z]/g, m => '-' + m.toLowerCase()); }
+    function regenResponsiveCSS() {
+      const shell = document.querySelector('.page-shell');
+      if (!shell) return;
+      let styleEl = document.getElementById('ed-responsive-overrides');
+      if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'ed-responsive-overrides'; shell.insertBefore(styleEl, shell.firstChild); }
+      const tablet = [], mobile = [];
+      shell.querySelectorAll('[data-ed-resp]').forEach(el => {
+        const uid = ensureUid(el), o = getResp(el);
+        const decl = bp => Object.keys(o[bp] || {}).map(p => camel2kebab(p) + ':' + o[bp][p] + ' !important').join(';');
+        const sel = '[data-ed-uid="' + uid + '"]';
+        // Media queries are scoped to :not(.edit-mode) so they only drive the
+        // real published page; inside the editor the body.ed-vp-* classes drive
+        // the simulated preview (the editor window's real width is irrelevant).
+        if (o.tablet && Object.keys(o.tablet).length) {
+          const d = decl('tablet');
+          tablet.push('@media (max-width:1024px){body:not(.edit-mode) ' + sel + '{' + d + '}}');
+          tablet.push('body.ed-vp-tablet ' + sel + '{' + d + '}body.ed-vp-mobile ' + sel + '{' + d + '}');
+        }
+        if (o.mobile && Object.keys(o.mobile).length) {
+          const d = decl('mobile');
+          mobile.push('@media (max-width:760px){body:not(.edit-mode) ' + sel + '{' + d + '}}');
+          mobile.push('body.ed-vp-mobile ' + sel + '{' + d + '}');
+        }
+      });
+      styleEl.textContent = tablet.join('\n') + '\n' + mobile.join('\n'); // mobile last → wins
+    }
+    // Apply a style change to the current preview viewport (desktop = global).
+    function applyStyle(el, prop, value) {
+      if (!el) return;
+      if (viewport === 'desktop') el.style[prop] = value;
+      else setResp(el, viewport, prop, value);
+    }
+
     bind('rWidth', 'input', e => {
       if (!activeBlock) return;
       const v = e.target.value + '%';
-      activeBlock.style.width = v;
+      applyStyle(activeBlock, 'width', v);
       setText('vWidth', v); saveToStorage();
     });
     bind('rMaxWidth', 'input', e => {
       if (!activeBlock) return;
       const v = e.target.value + 'px';
-      activeBlock.style.maxWidth = v;
+      applyStyle(activeBlock, 'maxWidth', v);
       setText('vMaxWidth', v); saveToStorage();
     });
     bind('edClearMaxWidth', 'click', () => {
       if (!activeBlock) return;
-      activeBlock.style.maxWidth = 'none';
+      applyStyle(activeBlock, 'maxWidth', 'none');
       setText('vMaxWidth', 'none'); saveToStorage(); showToast('Max-width cleared');
     });
     bind('rPadding', 'input', e => {
       if (!activeBlock) return;
       const v = e.target.value + 'px';
-      activeBlock.style.padding = v;
+      applyStyle(activeBlock, 'padding', v);
       setText('vPadding', v); saveToStorage();
     });
     bind('rMargin', 'input', e => {
       if (!activeBlock) return;
       const v = e.target.value + 'px';
-      activeBlock.style.marginTop = v;
-      activeBlock.style.marginBottom = v;
+      applyStyle(activeBlock, 'marginTop', v);
+      applyStyle(activeBlock, 'marginBottom', v);
       setText('vMargin', v); saveToStorage();
     });
     bind('rFontSize', 'input', e => {
       if (!activeBlock) return;
       const v = e.target.value + 'px';
-      activeBlock.style.fontSize = v;
+      applyStyle(activeBlock, 'fontSize', v);
       setText('vFontSize', v); saveToStorage();
     });
     bind('rLineHeight', 'input', e => {
       if (!activeBlock) return;
       const v = e.target.value;
-      activeBlock.style.lineHeight = (v / 100).toFixed(2);
+      applyStyle(activeBlock, 'lineHeight', (v / 100).toFixed(2));
       setText('vLineHeight', v + '%'); saveToStorage();
     });
     bind('rColor', 'input', e => {
       if (!activeBlock) return;
-      activeBlock.style.color = e.target.value;
+      applyStyle(activeBlock, 'color', e.target.value);
       saveToStorage();
     });
     bind('rBg', 'input', e => {
       if (!activeBlock) return;
-      activeBlock.style.background = e.target.value;
+      applyStyle(activeBlock, 'background', e.target.value);
       saveToStorage();
     });
     bind('rRadius', 'input', e => {
       if (!activeBlock) return;
       const v = e.target.value + 'px';
-      activeBlock.style.borderRadius = v;
+      applyStyle(activeBlock, 'borderRadius', v);
       setText('vRadius', v); saveToStorage();
     });
 
     document.querySelectorAll('.ed-align-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!activeBlock) return;
-        activeBlock.style.textAlign = btn.dataset.align;
+        applyStyle(activeBlock, 'textAlign', btn.dataset.align);
         document.querySelectorAll('.ed-align-btn').forEach(b => b.classList.toggle('active', b === btn));
         saveToStorage();
       });
@@ -36310,7 +36372,10 @@ window.__BRAND_FONTS = [
         document.querySelectorAll('.ed-vp-btn').forEach(b => b.classList.toggle('active', b === btn));
         body.classList.remove('ed-vp-tablet', 'ed-vp-mobile');
         if (vp !== 'desktop') body.classList.add('ed-vp-' + vp);
-        showToast(vp.charAt(0).toUpperCase() + vp.slice(1) + ' preview');
+        showToast(vp === 'desktop'
+          ? 'Desktop — edits apply to all screens'
+          : (vp.charAt(0).toUpperCase() + vp.slice(1)) + ' view — edits apply to ' + vp + ' & smaller only');
+        if (activeBlock) openPanelFor(activeBlock); // refresh panel values for this screen
       });
     });
 
@@ -36682,6 +36747,7 @@ window.__BRAND_FONTS = [
             showToast('New blog — edit and it saves automatically');
           }
           updateDocTitleAndUrl(currentBlogTitle());
+          try { regenResponsiveCSS(); } catch (e) {}
           if (exportKind) runAutoExport(exportKind);
         })
         .catch(function (err) {
@@ -36907,17 +36973,17 @@ window.__BRAND_FONTS = [
           if (boxLinked[prop]) {
             // Sync all 4 sides
             const v = isValid ? val + 'px' : '';
-            activeBlock.style[prop + 'Top'] = v;
-            activeBlock.style[prop + 'Right'] = v;
-            activeBlock.style[prop + 'Bottom'] = v;
-            activeBlock.style[prop + 'Left'] = v;
+            applyStyle(activeBlock, prop + 'Top', v);
+            applyStyle(activeBlock, prop + 'Right', v);
+            applyStyle(activeBlock, prop + 'Bottom', v);
+            applyStyle(activeBlock, prop + 'Left', v);
             // Update sibling box inputs
             document.querySelectorAll(`.ed-box-input[data-prop="${prop}"]`).forEach(other => {
               if (other !== input) other.value = isValid ? val : '';
             });
           } else {
             const cssProp = prop + side.charAt(0).toUpperCase() + side.slice(1);
-            activeBlock.style[cssProp] = isValid ? val + 'px' : '';
+            applyStyle(activeBlock, cssProp, isValid ? val + 'px' : '');
           }
           // Update the slider display value
           updateBoxSummary(prop);
@@ -37166,17 +37232,34 @@ window.__BRAND_FONTS = [
       const root = el.closest('.hero') || el.closest('.exhibit') || el.closest('.related-card') || el;
       return root.querySelector('img, video');
     }
+    function getMediaPos(mediaEl) {
+      const cs = getComputedStyle(mediaEl);
+      const op = mediaEl.style.objectPosition || cs.objectPosition || '50% 50%';
+      const m = op.match(/([\d.]+)%\s+([\d.]+)%/);
+      return m ? { x: +m[1], y: +m[2] } : { x: 50, y: 50 };
+    }
     function updateFitToggle(el) {
       const toggle = document.getElementById('edFitToggle');
+      const pos = document.getElementById('edPosControl');
       if (!toggle) return;
       const mediaEl = getMediaElFromBlock(el);
-      if (!mediaEl) { toggle.style.display = 'none'; return; }
+      if (!mediaEl) { toggle.style.display = 'none'; if (pos) pos.style.display = 'none'; return; }
       toggle.style.display = 'grid';
       const cs = getComputedStyle(mediaEl);
       const currentFit = mediaEl.style.objectFit || cs.objectFit || 'fill';
       toggle.querySelectorAll('.ed-fit-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.fit === currentFit);
       });
+      if (pos) {
+        const isRaster = mediaEl.tagName === 'IMG' || mediaEl.tagName === 'VIDEO';
+        pos.style.display = isRaster ? 'block' : 'none';
+        if (isRaster) {
+          const p = getMediaPos(mediaEl);
+          const sx = document.getElementById('edPosX'), sy = document.getElementById('edPosY');
+          if (sx) sx.value = p.x; if (sy) sy.value = p.y;
+          setText('vPosX', p.x + '%'); setText('vPosY', p.y + '%');
+        }
+      }
     }
     document.querySelectorAll('.ed-fit-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -37184,14 +37267,29 @@ window.__BRAND_FONTS = [
         const mediaEl = getMediaElFromBlock(activeBlock);
         if (!mediaEl) { showToast('No image or video in this block'); return; }
         const fit = btn.dataset.fit;
-        mediaEl.style.objectFit = fit;
+        applyStyle(mediaEl, 'objectFit', fit);
         // For hero: also reset background since contain may show letterbox color
         if (activeBlock.closest('.hero')) {
-          mediaEl.style.background = fit === 'contain' ? '#0F1029' : '';
+          applyStyle(mediaEl, 'background', fit === 'contain' ? '#0F1029' : '');
         }
         document.querySelectorAll('.ed-fit-btn').forEach(b => b.classList.toggle('active', b === btn));
+        updateFitToggle(activeBlock);
         saveToStorage();
-        showToast('Media fit: ' + fit);
+        showToast('Media fit: ' + fit + (fit === 'cover' ? ' — use the position sliders to pan' : ''));
+      });
+    });
+    ['edPosX', 'edPosY'].forEach(id => {
+      const sl = document.getElementById(id);
+      if (!sl) return;
+      sl.addEventListener('input', () => {
+        if (!activeBlock) return;
+        const mediaEl = getMediaElFromBlock(activeBlock);
+        if (!mediaEl) return;
+        const cur = getMediaPos(mediaEl);
+        if (id === 'edPosX') cur.x = +sl.value; else cur.y = +sl.value;
+        applyStyle(mediaEl, 'objectPosition', cur.x + '% ' + cur.y + '%');
+        setText('vPosX', cur.x + '%'); setText('vPosY', cur.y + '%');
+        saveToStorage();
       });
     });
 
